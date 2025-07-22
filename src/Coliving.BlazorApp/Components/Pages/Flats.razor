@@ -1,0 +1,74 @@
+@page "/flats"
+@rendermode InteractiveServer
+
+@using Coliving.BlazorApp.Data
+@using Coliving.BlazorApp.Models
+@using Coliving.BlazorApp.Models.Matrix.Core.Models
+@using Microsoft.EntityFrameworkCore;
+@inject ColivingDbContext ColivingDbContext
+
+<PageTitle>Potential Homes</PageTitle>
+
+<h1>Potential Homes</h1>
+
+@if (flats == null)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading potential homes...</p>
+    </div>
+}
+else if (!flats.Any())
+{
+    <div class="alert alert-info">
+        <h4>No potential homes found</h4>
+        <p>Check back later for new listings!</p>
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var flat in flats)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@flat.Title</h5>
+                        <p class="card-text">@flat.Description</p>
+                        <p class="card-text">
+                            <i class="bi bi-geo-alt"></i>
+                            @flat.City, @flat.Country
+                        </p>
+                        <p class="card-text">
+                            <strong>Price:</strong> @flat.PricePerMonth.ToString("C")
+                        </p>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small>Listed: @flat.DateListed.ToShortDateString()</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Flat>? flats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            flats = await ColivingDbContext.Flats
+                .OrderByDescending(h => h.DateListed)
+                .Take(50)
+                .ToListAsync();
+        }
+        catch
+        {
+            flats = new List<Flat>();
+        }
+    }
+}

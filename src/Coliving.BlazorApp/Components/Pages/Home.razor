@@ -1,0 +1,154 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Coliving.BlazorApp.Data
+@using Coliving.BlazorApp.Models.Matrix.Core.Models
+
+@inject UserManager<ApplicationUser> UserManager
+@inject ColivingDbContext DbContext
+
+<PageTitle>Home</PageTitle>
+
+<h1>Welcome to Coliving Community!</h1>
+
+<p>Discover and connect with our amazing community members.</p>
+
+@if (users == null)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading users...</p>
+    </div>
+}
+else if (users.Count == 0)
+{
+    <div class="alert alert-info">
+        <h4>No users found</h4>
+        <p>Be the first to join our community!</p>
+    </div>
+}
+else
+{
+    <h2>Community Members (@users.Count)</h2>
+    
+    <div class="row">
+        @foreach (var user in users)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <img 
+                            src="@GetProfileImageUrl(user)" 
+                            alt="Profile image" 
+                            class="rounded-circle mb-3" 
+                            style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #eee;" />
+                        <h5 class="card-title">
+                            @if (!string.IsNullOrEmpty(user.FirstName) && !string.IsNullOrEmpty(user.LastName))
+                            {
+                                @($"{user.FirstName} {user.LastName}")
+                            }
+                            else if (!string.IsNullOrEmpty(user.Name))
+                            {
+                                @user.Name
+                            }
+                            else
+                            {
+                                @user.Email?.Split('@')[0]
+                            }
+                        </h5>
+                        
+                        @if (!string.IsNullOrEmpty(user.Email))
+                        {
+                            <p class="card-text">
+                                <i class="bi bi-envelope"></i> @user.Email
+                            </p>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(user.City) || !string.IsNullOrEmpty(user.Country))
+                        {
+                            <p class="card-text">
+                                <i class="bi bi-geo-alt"></i> 
+                                @if (!string.IsNullOrEmpty(user.City))
+                                {
+                                    @user.City
+                                }
+                                @if (!string.IsNullOrEmpty(user.City) && !string.IsNullOrEmpty(user.Country))
+                                {
+                                    <text>, </text>
+                                }
+                                @if (!string.IsNullOrEmpty(user.Country))
+                                {
+                                    @user.Country
+                                }
+                            </p>
+                        }
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="bi bi-heart-fill text-success"></i> Kindness: @user.Kindness
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="bi bi-leaf-fill text-success"></i> Sustainability: @user.Sustainability
+                                </small>
+                            </div>
+                        </div>
+                        
+                        @if (user.Points > 0)
+                        {
+                            <div class="mt-2">
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-star-fill"></i> @user.Points points
+                                </span>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small>Joined: @user.Id</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<ApplicationUser>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get all users from the database
+            users = await DbContext.ApplicationUsers
+                .Where(u => u.IsColivingUser) // Only show confirmed users for privacy
+                .OrderByDescending(u => u.Points)
+                .ThenBy(u => u.FirstName ?? u.Name ?? u.Email)
+
+                .Take(50) // Limit to first 50 users for performance
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            // Handle any database errors gracefully
+            users = new List<ApplicationUser>();
+            // In a production app, you might want to log this error
+        }
+    }
+
+    private string GetProfileImageUrl(ApplicationUser user)
+    {
+        // Use a deterministic value to assign a randomuser.me image
+        // Use gender if available, otherwise default to 'men'
+        string gender = !string.IsNullOrEmpty(user.Gender) && user.Gender.ToLower() == "female" ? "women" : "men";
+        // Use a hash of the user ID or email to pick an image number between 1 and 99
+        int imageNumber = Math.Abs((user.Id != 0 ? user.Id : user.Email?.GetHashCode() ?? 1)) % 99 + 1;
+        return $"https://randomuser.me/api/portraits/{gender}/{imageNumber}.jpg";
+    }
+}
