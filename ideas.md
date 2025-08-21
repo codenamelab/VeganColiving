@@ -20,6 +20,8 @@ VeganEverything
 Målgruppe:
 “Alle” veganere.
 
+Matching: Oppretting av "lukket" gruppe am matchede personer - etter de har bekreftet. Alternativ for å åpne for flere gruppemedlemmer. Venteliste. Visning av preferanser (hva som er likt hva som er ulikt).
+
 Markedsundersøkelser: 
 Spørre om innspill i veganplattformer og i samtaler.
 
