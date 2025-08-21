@@ -100,6 +100,19 @@ namespace Coliving.BlazorApp
                 return Results.File(flat.ImageBytes, contentType);
             });
 
+            // Minimal API to serve images from the Images table by id
+            app.MapGet("/api/images/{id:int}", async (int id, ColivingDbContext db) =>
+            {
+                var image = await db.Images.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+                if (image?.Data is null || image.Data.Length == 0)
+                {
+                    return Results.NotFound();
+                }
+                var contentType = string.IsNullOrWhiteSpace(image.ContentType) ? "image/jpeg" : image.ContentType;
+                var fileName = string.IsNullOrWhiteSpace(image.FileName) ? $"image-{id}.jpg" : image.FileName;
+                return Results.File(image.Data, contentType, fileDownloadName: fileName);
+            });
+
             // Endpoint to set culture via cookie and redirect back
             app.MapGet("set-culture/{culture}", (HttpContext httpContext, string culture) =>
             {

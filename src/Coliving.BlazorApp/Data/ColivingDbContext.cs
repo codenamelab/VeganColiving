@@ -58,12 +58,19 @@ namespace Coliving.BlazorApp.Data
 					  .HasForeignKey(e => e.FlatId)
 					  .OnDelete(DeleteBehavior.Cascade);
 			});
+
+			// Flat has many Images
+			modelBuilder.Entity<Flat>()
+				.HasMany(f => f.Images)
+				.WithOne()
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 
 	public DbSet<ApplicationUser> ApplicationUsers { get; set; } = null!;
 	public DbSet<Flat> Flats { get; set; } = null!;
 	public DbSet<FlatEngagement> FlatEngagements { get; set; } = null!;
 	public DbSet<Room> Rooms { get; set; } = null!;
+	public DbSet<Image> Images { get; set; } = null!;
 
 	}
 }

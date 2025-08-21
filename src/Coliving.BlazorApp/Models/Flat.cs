@@ -48,6 +48,9 @@ namespace Coliving.BlazorApp.Models
 		// Navigation: Rooms in this flat/home
 		public virtual ICollection<Room>? Rooms { get; set; }
 
+		// Navigation: Multiple images for this flat
+		public virtual ICollection<Image>? Images { get; set; }
+
 		// Additional fields can be added as needed, such as amenities, owner, etc.
 	}
 }

@@ -1,0 +1,338 @@
+@page "/homes/{id:int}/edit"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using Coliving.BlazorApp.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Coliving.BlazorApp.Data
+@using Microsoft.EntityFrameworkCore
+@using System
+@using System.IO
+@inject ColivingDbContext Db
+@inject NavigationManager Nav
+
+@attribute [Authorize]
+
+<PageTitle>Edit Home</PageTitle>
+
+<h1>Edit Home</h1>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+else if (existingFlat is null)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading home...</p>
+    </div>
+}
+else
+{
+    <EditForm Model="@existingFlat" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Title</label>
+                <InputText class="form-control" @bind-Value="existingFlat.Title" />
+                <ValidationMessage For="@(() => existingFlat.Title)" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Type</label>
+                <InputText class="form-control" @bind-Value="existingFlat.Type" placeholder="Apartment, House, Room" />
+                <ValidationMessage For="@(() => existingFlat.Type)" />
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Description</label>
+                <InputTextArea class="form-control" @bind-Value="existingFlat.Description" rows="4" />
+                <ValidationMessage For="@(() => existingFlat.Description)" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">City</label>
+                <InputText class="form-control" @bind-Value="existingFlat.City" />
+                <ValidationMessage For="@(() => existingFlat.City)" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Country</label>
+                <InputText class="form-control" @bind-Value="existingFlat.Country" />
+                <ValidationMessage For="@(() => existingFlat.Country)" />
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Address</label>
+                <InputText class="form-control" @bind-Value="existingFlat.Address" />
+                <ValidationMessage For="@(() => existingFlat.Address)" />
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Price per month</label>
+                <InputNumber class="form-control" @bind-Value="existingFlat.PricePerMonth" />
+                <ValidationMessage For="@(() => existingFlat.PricePerMonth)" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Capacity</label>
+                <InputNumber class="form-control" @bind-Value="existingFlat.Capacity" />
+                <ValidationMessage For="@(() => existingFlat.Capacity)" />
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Primary image URL</label>
+                <InputText class="form-control" @bind-Value="existingFlat.ImageUrl" />
+                <ValidationMessage For="@(() => existingFlat.ImageUrl)" />
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Or upload a new primary image</label>
+                <InputFile OnChange="OnImageSelected" accept="image/*" />
+                @if (!string.IsNullOrEmpty(imagePreviewDataUrl))
+                {
+                    <div class="mt-2">
+                        <img src="@imagePreviewDataUrl" alt="Preview" style="max-width: 320px; max-height: 240px; border-radius:8px; box-shadow: var(--shadow-soft);" />
+                        <div class="mt-2 d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ClearImage">Remove uploaded image</button>
+                            @if (!string.IsNullOrEmpty(originalImageUrl))
+                            {
+                                <a class="btn btn-sm btn-outline-secondary" href="@originalImageUrl" target="_blank">View current image</a>
+                            }
+                        </div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(originalImageUrl))
+                {
+                    <div class="mt-2">
+                        <img src="@originalImageUrl" alt="Current image" style="max-width: 320px; max-height: 240px; border-radius:8px; box-shadow: var(--shadow-soft);" />
+                    </div>
+                }
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Add more images (up to 10)</label>
+                <InputFile OnChange="OnAdditionalImagesSelected" multiple accept="image/*" />
+                @if (additionalImagePreviews.Count > 0)
+                {
+                    <div class="mt-2 d-flex flex-wrap gap-2">
+                        @foreach (var preview in additionalImagePreviews)
+                        {
+                            <img src="@preview" alt="Additional image" class="img-thumbnail" style="max-width: 140px; max-height: 140px; object-fit:cover;" />
+                        }
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ClearAdditionalImages">Clear additional images</button>
+                    </div>
+                }
+
+                @if (existingFlat.Images is not null && existingFlat.Images.Any())
+                {
+                    <div class="mt-3">
+                        <div class="small text-muted mb-1">Current images</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var img in existingFlat.Images)
+                            {
+                                <img src="@($"/api/images/{img.Id}")" alt="@img.Title" class="img-thumbnail" style="max-width: 140px; max-height: 140px; object-fit:cover;" />
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2 align-items-start">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a href="/homes/@id" class="btn btn-secondary">Cancel</a>
+            <button type="button" class="btn btn-outline-danger" @onclick="() => showDeleteConfirm = true">Delete home</button>
+        </div>
+
+        @if (showDeleteConfirm)
+        {
+            <div class="alert alert-warning mt-3" role="alert">
+                <div class="fw-bold mb-2">Delete this home?</div>
+                <p class="mb-2">This action cannot be undone. All related rooms, images, and engagements will also be deleted.</p>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-danger" @onclick="DeleteFlatAsync">Yes, delete</button>
+                    <button type="button" class="btn btn-outline-secondary" @onclick="() => showDeleteConfirm = false">Cancel</button>
+                </div>
+            </div>
+        }
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private Flat? existingFlat;
+    private string? error;
+    private string? imagePreviewDataUrl;
+    private string? originalImageUrl;
+    private readonly List<(byte[] bytes, string contentType, string? title)> additionalImages = new();
+    private readonly List<string> additionalImagePreviews = new();
+    private bool showDeleteConfirm;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            existingFlat = await Db.Flats.Include(f => f.Images).FirstOrDefaultAsync(f => f.Id == id);
+            if (existingFlat is null)
+            {
+                error = "Home not found.";
+                return;
+            }
+
+            // Keep a reference to the current image shown
+            originalImageUrl = !string.IsNullOrWhiteSpace(existingFlat.ImageUrl)
+                ? existingFlat.ImageUrl
+                : (existingFlat.ImageBytes != null && existingFlat.ImageBytes.Length > 0 ? $"/api/flats/{existingFlat.Id}/image" : null);
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to load home: {ex.Message}";
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Ensure we generate a URL if raw image provided
+            if (existingFlat!.ImageBytes != null && !string.IsNullOrWhiteSpace(existingFlat.ImageContentType))
+            {
+                existingFlat.ImageUrl = $"/api/flats/{existingFlat.Id}/image";
+            }
+
+            // Attach any newly added additional images
+            if (additionalImages.Count > 0)
+            {
+                existingFlat.Images ??= new List<Image>();
+                foreach (var (bytes, contentType, title) in additionalImages.Take(10))
+                {
+                    existingFlat.Images.Add(new Image
+                    {
+                        Data = bytes,
+                        ContentType = contentType,
+                        Title = title,
+                        FileName = null
+                    });
+                }
+            }
+
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo($"/homes/{existingFlat!.Id}");
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to save changes: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteFlatAsync()
+    {
+        if (existingFlat is null) return;
+
+        try
+        {
+            Db.Flats.Remove(existingFlat);
+            await Db.SaveChangesAsync();
+            Nav.NavigateTo("/homes");
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to delete home: {ex.Message}";
+            showDeleteConfirm = false;
+        }
+    }
+
+    private async Task OnImageSelected(InputFileChangeEventArgs e)
+    {
+        error = null;
+        imagePreviewDataUrl = null;
+        var file = e.File;
+        if (file is null || existingFlat is null)
+        {
+            if (existingFlat is not null)
+            {
+                existingFlat.ImageBytes = null;
+                existingFlat.ImageContentType = null;
+            }
+            return;
+        }
+
+        const long maxFileSize = 4 * 1024 * 1024; // 4 MB
+        if (file.Size > maxFileSize)
+        {
+            error = "Image too large. Maximum size is 4 MB.";
+            existingFlat.ImageBytes = null;
+            existingFlat.ImageContentType = null;
+            return;
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream(maxFileSize);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            existingFlat.ImageBytes = ms.ToArray();
+            existingFlat.ImageContentType = file.ContentType;
+            imagePreviewDataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(existingFlat.ImageBytes)}";
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to read image: {ex.Message}";
+            existingFlat.ImageBytes = null;
+            existingFlat.ImageContentType = null;
+        }
+    }
+
+    private async Task OnAdditionalImagesSelected(InputFileChangeEventArgs e)
+    {
+        error = null;
+        additionalImages.Clear();
+        additionalImagePreviews.Clear();
+
+        const long maxFileSize = 4 * 1024 * 1024; // 4 MB per image
+        var files = e.GetMultipleFiles(10);
+        foreach (var file in files)
+        {
+            if (file.Size > maxFileSize)
+            {
+                error = "One or more images are too large (max 4 MB each).";
+                continue;
+            }
+
+            try
+            {
+                using var stream = file.OpenReadStream(maxFileSize);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                additionalImages.Add((bytes, file.ContentType, file.Name));
+                additionalImagePreviews.Add($"data:{file.ContentType};base64,{Convert.ToBase64String(bytes)}");
+            }
+            catch (Exception ex)
+            {
+                error = $"Failed to read an additional image: {ex.Message}";
+            }
+        }
+    }
+
+    private void ClearImage()
+    {
+        if (existingFlat is null) return;
+        existingFlat.ImageBytes = null;
+        existingFlat.ImageContentType = null;
+        imagePreviewDataUrl = null;
+    }
+
+    private void ClearAdditionalImages()
+    {
+        additionalImages.Clear();
+        additionalImagePreviews.Clear();
+    }
+}

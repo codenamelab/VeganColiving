@@ -23,11 +23,31 @@ else if (flat is null)
 else
 {
     <div class="container py-3">
-        <a class="btn btn-link mb-3" href="/homes">? Back to homes</a>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a class="btn btn-link" href="/homes">? Back to homes</a>
+            <AuthorizeView>
+                <Authorized>
+                    <a class="btn btn-outline-secondary btn-sm" href="/homes/@flat.Id/edit">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </a>
+                </Authorized>
+            </AuthorizeView>
+        </div>
 
         <div class="row g-3">
             <div class="col-12 col-lg-6">
-                @if (!string.IsNullOrEmpty(ImageUrl))
+                @if (flat.Images != null && flat.Images.Any())
+                {
+                    <div class="mb-3">
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var img in flat.Images)
+                            {
+                                <img src="@($"/api/images/{img.Id}")" alt="@img.Title" class="img-thumbnail" style="max-width: 180px; max-height: 180px; object-fit:cover;" />
+                            }
+                        </div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(ImageUrl))
                 {
                     <img src="@ImageUrl" alt="@flat.Title" class="img-fluid rounded" style="object-fit:cover; max-height:400px; width:100%;" />
                 }

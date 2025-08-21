@@ -106,7 +106,7 @@ namespace Coliving.BlazorApp.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Flats.
+        ///   Looks up a localized string similar to Home.
         /// </summary>
         internal static string Nav_Flats {
             get {
@@ -115,7 +115,7 @@ namespace Coliving.BlazorApp.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Home.
+        ///   Looks up a localized string similar to Frontpage.
         /// </summary>
         internal static string Nav_Home {
             get {

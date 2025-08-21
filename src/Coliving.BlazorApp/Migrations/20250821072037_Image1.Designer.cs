@@ -4,6 +4,7 @@ using Coliving.BlazorApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coliving.BlazorApp.Migrations
 {
     [DbContext(typeof(ColivingDbContext))]
-    partial class ColivingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250821072037_Image1")]
+    partial class Image1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,15 +125,10 @@ namespace Coliving.BlazorApp.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FlatId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FlatId");
 
                     b.ToTable("VeganColiving_Image");
                 });
@@ -468,14 +466,6 @@ namespace Coliving.BlazorApp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Coliving.BlazorApp.Models.Image", b =>
-                {
-                    b.HasOne("Coliving.BlazorApp.Models.Flat", null)
-                        .WithMany("Images")
-                        .HasForeignKey("FlatId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Coliving.BlazorApp.Models.Room", b =>
                 {
                     b.HasOne("Coliving.BlazorApp.Models.Flat", "Flat")
@@ -540,8 +530,6 @@ namespace Coliving.BlazorApp.Migrations
 
             modelBuilder.Entity("Coliving.BlazorApp.Models.Flat", b =>
                 {
-                    b.Navigation("Images");
-
                     b.Navigation("Rooms");
                 });
 #pragma warning restore 612, 618

@@ -49,21 +49,31 @@ window.FlatsMap = (function () {
 
   function popupHtml(p) {
     const img = p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;max-height:120px;object-fit:cover;border-radius:4px;margin-bottom:6px;"/>` : '';
-    const price = isFinite(p.price) ? `<div><strong>Price:</strong> ${p.price.toFixed(0)}</div>` : '';
+    const price = isFinite(p.price) ? `<div><strong>Price:</strong> ${Number(p.price).toFixed(0)}</div>` : '';
     const address = [p.address, p.city, p.country].filter(Boolean).join(', ');
+    const link = (p.id != null) ? `<div style="margin-top:6px"><a href="/homes/${p.id}">View home</a></div>` : '';
     return `
       <div style="min-width:220px">
         ${img}
         <div style="font-weight:600;margin-bottom:4px">${p.title || 'Flat'}</div>
         <div style="color:#555">${address}</div>
         ${price}
+        ${link}
       </div>
     `;
   }
 
   return {
-    init: function (elementId) {
+    // optionsOrElementId: string | { elementId, center?: [lat,lon], zoom?: number }
+    init: function (optionsOrElementId) {
       loadCache();
+      const opts = (typeof optionsOrElementId === 'string')
+        ? { elementId: optionsOrElementId }
+        : (optionsOrElementId || {});
+      const elementId = opts.elementId || 'map';
+      const defaultCenter = Array.isArray(opts.center) && opts.center.length === 2 ? opts.center : [59.9139, 10.7522];
+      const defaultZoom = Number.isFinite(opts.zoom) ? opts.zoom : 12;
+
       const el = document.getElementById(elementId);
       if (!el) {
         console.error('[FlatsMap] Container not found:', elementId);
@@ -80,7 +90,7 @@ window.FlatsMap = (function () {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
-      map.setView([20, 0], 2); // world view by default
+      map.setView(defaultCenter, defaultZoom); // center on Oslo by default
       return true;
     },
 
@@ -89,7 +99,7 @@ window.FlatsMap = (function () {
       markers = [];
     },
 
-  plot: async function (points) {
+    plot: async function (points) {
       if (!map) {
         console.warn('[FlatsMap] plot called before init');
         return;

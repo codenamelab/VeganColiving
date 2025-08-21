@@ -67,13 +67,13 @@
         </div>
 
         <div class="col-12">
-            <label class="form-label">Image URL</label>
+            <label class="form-label">Primary image URL</label>
             <InputText class="form-control" @bind-Value="newFlat.ImageUrl" />
             <ValidationMessage For="@(() => newFlat.ImageUrl)" />
         </div>
 
         <div class="col-12">
-            <label class="form-label">Or upload an image</label>
+            <label class="form-label">Or upload a primary image</label>
             <InputFile OnChange="OnImageSelected" accept="image/*" />
             @if (!string.IsNullOrEmpty(imagePreviewDataUrl))
             {
@@ -82,6 +82,23 @@
                     <div class="mt-2">
                         <button type="button" class="btn btn-sm btn-outline-danger" @onclick="ClearImage">Remove uploaded image</button>
                     </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-12">
+            <label class="form-label">Additional images (up to 10)</label>
+            <InputFile OnChange="OnAdditionalImagesSelected" multiple accept="image/*" />
+            @if (additionalImagePreviews.Count > 0)
+            {
+                <div class="mt-2 d-flex flex-wrap gap-2">
+                    @foreach (var preview in additionalImagePreviews)
+                    {
+                        <img src="@preview" alt="Additional image" class="img-thumbnail" style="max-width: 140px; max-height: 140px; object-fit:cover;" />
+                    }
+                </div>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ClearAdditionalImages">Clear additional images</button>
                 </div>
             }
         </div>

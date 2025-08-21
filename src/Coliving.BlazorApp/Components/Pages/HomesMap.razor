@@ -20,27 +20,45 @@ else if (flats.Count == 0)
 }
 
 @code {
-    private List<Flat> flats = new();
+    private List<Flat>? flats; // null until loaded
+    private bool mapReady;
+    private bool plotted;
 
     protected override async Task OnInitializedAsync()
     {
         flats = await Db.Flats
             .OrderByDescending(f => f.DateListed)
             .ToListAsync();
+        // Trigger re-render so OnAfterRenderAsync runs again to plot
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // For now still use demo listings in JS; could map real data here
-            await JS.InvokeVoidAsync("HomesMap.init", new
+            // Initialize map centered on Oslo
+            mapReady = await JS.InvokeAsync<bool>("FlatsMap.init", new { elementId = "map", center = new[] { 59.9139, 10.7522 }, zoom = 12 });
+        }
+
+        // Plot when data is available and not yet plotted
+        if (mapReady && !plotted && flats is not null && flats.Count > 0)
+        {
+            var points = flats.Select(f => new
             {
-                elementId = "map",
-                center = new[] { 59.9139, 10.7522 },
-                zoom = 12,
-                listings = new object[] { }
-            });
+                id = f.Id,
+                title = f.Title,
+                address = f.Address,
+                city = f.City,
+                country = f.Country,
+                price = (double)f.PricePerMonth,
+                imageUrl = !string.IsNullOrWhiteSpace(f.ImageUrl)
+                    ? f.ImageUrl
+                    : (f.ImageBytes != null && f.ImageBytes.Length > 0 ? $"/api/flats/{f.Id}/image" : null)
+            }).ToList();
+
+            await JS.InvokeVoidAsync("FlatsMap.plot", points);
+            plotted = true;
         }
     }
 
