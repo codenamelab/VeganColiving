@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coliving.BlazorApp.Models
 {
+	[Table("VeganColiving_Flat")]
 	public class Flat
 	{
 		[Key]
@@ -36,6 +38,15 @@ namespace Coliving.BlazorApp.Models
 
 		[StringLength(500)]
 		public string? ImageUrl { get; set; }
+
+		// New: store image directly in DB
+		public byte[]? ImageBytes { get; set; }
+
+		[StringLength(100)]
+		public string? ImageContentType { get; set; }
+
+		// Navigation: Rooms in this flat/home
+		public virtual ICollection<Room>? Rooms { get; set; }
 
 		// Additional fields can be added as needed, such as amenities, owner, etc.
 	}

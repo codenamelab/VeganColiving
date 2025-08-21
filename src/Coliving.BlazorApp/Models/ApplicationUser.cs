@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
+using Coliving.BlazorApp.Models; // for UserPreferences
 
 namespace Coliving.BlazorApp.Models
 {
@@ -13,36 +14,36 @@ namespace Coliving.BlazorApp.Models
 		public class ApplicationUser : IdentityUser<int>/*, IActor*/
 		{
 			[MaxLength(100)]
-			public string FirstName { get; set; } //required
+			public string? FirstName { get; set; } //required
 
 			[MaxLength(100)]
-			public string LastName { get; set; } //required
+			public string? LastName { get; set; } //required
 
-			public DateTime DateOfBirth { get; set; }
+			public DateTime? DateOfBirth { get; set; }
 
-			public int Points { get; set; }
+			public int? Points { get; set; }
 
-			public int ReadingWordsPerMinute { get; set; }
-			public int TypingCharPerMinute { get; set; }
+			//public int ReadingWordsPerMinute { get; set; }
+			//public int TypingCharPerMinute { get; set; }
 
-			public string CardNumber { get; set; }
-			public string SecurityNumber { get; set; }
+			public string? CardNumber { get; set; }
+			public string? SecurityNumber { get; set; }
 
 			[RegularExpression(@"(0[1-9]|1[0-2])\/[0-9]{2}", ErrorMessage = "Expiration should match a valid MM/YY value")]
-			public string Expiration { get; set; }
+			public string? Expiration { get; set; }
 
-			public string CardHolderName { get; set; }
-			public int CardType { get; set; }
+			public string? CardHolderName { get; set; }
+			public int? CardType { get; set; }
 
-			public string Street { get; set; }
-			public string City { get; set; }
+			public string? Street { get; set; }
+			public string? City { get; set; }
 
-			public string State { get; set; }
+			public string? State { get; set; }
 
-			public string Country { get; set; }
+			public string? Country { get; set; }
 
-			public string ZipCode { get; set; }
-			public string Name { get; set; }
+			public string? ZipCode { get; set; }
+			public string? Name { get; set; }
 
 			[NotMapped]
 			public int Sustainability { get; set; }
@@ -66,6 +67,11 @@ namespace Coliving.BlazorApp.Models
 			//public ICollection<Special.Task>? Tasks { get; set; }
 			//public ICollection<Idea>? Ideas { get; set; }
 			//public ICollection<Skill>? Skills { get; set; }
+			// Convenience navigations (optional)
+			[NotMapped]
+			public virtual ICollection<Flat>? InterestedFlats { get; set; }
+
+			// 1:1 preferences entity
 
 			public ApplicationUser()
 			{

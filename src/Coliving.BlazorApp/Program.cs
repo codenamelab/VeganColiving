@@ -4,8 +4,10 @@ using Coliving.BlazorApp.Data;
 using Coliving.BlazorApp.Models.Matrix.Core.Models;
 
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Coliving.BlazorApp
 {
@@ -43,6 +45,9 @@ namespace Coliving.BlazorApp
 
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+            // Localization
+            builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -52,12 +57,27 @@ namespace Coliving.BlazorApp
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler("/Error", createScopeForErrors: true);
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
+
+            // Configure supported cultures (English and Norwegian Bokmål)
+            var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("nb-NO") };
+            var localizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture("en"),
+                SupportedCultures = supportedCultures,
+                SupportedUICultures = supportedCultures,
+                RequestCultureProviders =
+                [
+                    new CookieRequestCultureProvider(),
+                    new AcceptLanguageHeaderRequestCultureProvider()
+                ]
+            };
+            app.UseRequestLocalization(localizationOptions);
 
             app.UseAntiforgery();
 
@@ -67,6 +87,53 @@ namespace Coliving.BlazorApp
 
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
+
+            // Minimal API to serve flat images stored in DB
+            app.MapGet("/api/flats/{id:int}/image", async (int id, ColivingDbContext db) =>
+            {
+                var flat = await db.Flats.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
+                if (flat?.ImageBytes is null || flat.ImageBytes.Length == 0)
+                {
+                    return Results.NotFound();
+                }
+                var contentType = string.IsNullOrWhiteSpace(flat.ImageContentType) ? "image/jpeg" : flat.ImageContentType;
+                return Results.File(flat.ImageBytes, contentType);
+            });
+
+            // Endpoint to set culture via cookie and redirect back
+            app.MapGet("set-culture/{culture}", (HttpContext httpContext, string culture) =>
+            {
+                // prefer explicit returnUrl query string; fall back to Referer; then root
+                var query = httpContext.Request.Query;
+                var returnUrl = query.ContainsKey("returnUrl") ? query["returnUrl"].ToString() : httpContext.Request.Headers.Referer.ToString();
+                if (string.IsNullOrWhiteSpace(returnUrl))
+                {
+                    returnUrl = "/";
+                }
+
+                // Prevent open redirect: only allow local URLs
+                static bool IsLocalUrl(string url)
+                {
+                    if (string.IsNullOrEmpty(url)) return false;
+                    if (url[0] != '/') return false;
+                    // url is local if it starts with '/' but not '//' or '/\'
+                    return url.Length == 1 || (url[1] != '/' && url[1] != '\\');
+                }
+
+                if (!IsLocalUrl(returnUrl))
+                {
+                    returnUrl = "/";
+                }
+
+                var requestCulture = new RequestCulture(culture);
+                httpContext.Response.Cookies.Append(
+                    CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(requestCulture),
+                    new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true, Path = "/" }
+                );
+
+                return Results.Redirect(returnUrl);
+            });
 
             app.Run();
         }

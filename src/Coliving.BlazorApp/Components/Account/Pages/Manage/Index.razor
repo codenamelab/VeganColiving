@@ -29,6 +29,90 @@
                 <label for="Input.PhoneNumber" class="form-label">Phone number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstName" id="Input.FirstName" class="form-control" placeholder="First name" />
+                <label for="Input.FirstName" class="form-label">First name</label>
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.LastName" id="Input.LastName" class="form-control" placeholder="Last name" />
+                <label for="Input.LastName" class="form-label">Last name</label>
+                <ValidationMessage For="() => Input.LastName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputDate @bind-Value="Input.DateOfBirth" id="Input.DateOfBirth" class="form-control" />
+                <label for="Input.DateOfBirth" class="form-label">Date of birth</label>
+                <ValidationMessage For="() => Input.DateOfBirth" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputNumber @bind-Value="Input.Points" id="Input.Points" class="form-control" />
+                <label for="Input.Points" class="form-label">Points</label>
+                <ValidationMessage For="() => Input.Points" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Name" id="Input.Name" class="form-control" placeholder="Display name" />
+                <label for="Input.Name" class="form-label">Display name</label>
+                <ValidationMessage For="() => Input.Name" class="text-danger" />
+            </div>
+
+            <h5 class="mt-4">Address</h5>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Street" id="Input.Street" class="form-control" placeholder="Street" />
+                <label for="Input.Street" class="form-label">Street</label>
+                <ValidationMessage For="() => Input.Street" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.City" id="Input.City" class="form-control" placeholder="City" />
+                <label for="Input.City" class="form-label">City</label>
+                <ValidationMessage For="() => Input.City" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.State" id="Input.State" class="form-control" placeholder="State" />
+                <label for="Input.State" class="form-label">State</label>
+                <ValidationMessage For="() => Input.State" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Country" id="Input.Country" class="form-control" placeholder="Country" />
+                <label for="Input.Country" class="form-label">Country</label>
+                <ValidationMessage For="() => Input.Country" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.ZipCode" id="Input.ZipCode" class="form-control" placeholder="Zip code" />
+                <label for="Input.ZipCode" class="form-label">Zip code</label>
+                <ValidationMessage For="() => Input.ZipCode" class="text-danger" />
+            </div>
+
+            <h5 class="mt-4">Payment</h5>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.CardHolderName" id="Input.CardHolderName" class="form-control" placeholder="Card holder name" />
+                <label for="Input.CardHolderName" class="form-label">Card holder name</label>
+                <ValidationMessage For="() => Input.CardHolderName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.CardNumber" id="Input.CardNumber" class="form-control" placeholder="Card number" />
+                <label for="Input.CardNumber" class="form-label">Card number</label>
+                <ValidationMessage For="() => Input.CardNumber" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.SecurityNumber" id="Input.SecurityNumber" type="password" class="form-control" placeholder="Security number (CVV)" />
+                <label for="Input.SecurityNumber" class="form-label">Security number (CVV)</label>
+                <ValidationMessage For="() => Input.SecurityNumber" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Expiration" id="Input.Expiration" class="form-control" placeholder="MM/YY" />
+                <label for="Input.Expiration" class="form-label">Expiration (MM/YY)</label>
+                <ValidationMessage For="() => Input.Expiration" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputNumber @bind-Value="Input.CardType" id="Input.CardType" class="form-control" />
+                <label for="Input.CardType" class="form-label">Card type</label>
+                <ValidationMessage For="() => Input.CardType" class="text-danger" />
+            </div>
+
+            <div class="form-check form-switch mb-4">
+                <InputCheckbox @bind-Value="Input.IsColivingUser" id="Input.IsColivingUser" class="form-check-input" />
+                <label for="Input.IsColivingUser" class="form-check-label">Is Coliving user</label>
+            </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </EditForm>
     </div>
@@ -51,7 +135,24 @@
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
 
+        // Map existing user values into the input model
         Input.PhoneNumber ??= phoneNumber;
+        Input.FirstName = user.FirstName;
+        Input.LastName = user.LastName;
+        Input.DateOfBirth = user.DateOfBirth;
+        Input.Points = user.Points;
+        Input.CardNumber = user.CardNumber;
+        Input.SecurityNumber = user.SecurityNumber;
+        Input.Expiration = user.Expiration;
+        Input.CardHolderName = user.CardHolderName;
+        Input.CardType = user.CardType;
+        Input.Street = user.Street;
+        Input.City = user.City;
+        Input.State = user.State;
+        Input.Country = user.Country;
+        Input.ZipCode = user.ZipCode;
+        Input.Name = user.Name;
+        Input.IsColivingUser = user.IsColivingUser;
     }
 
     private async Task OnValidSubmitAsync()
@@ -65,6 +166,31 @@
             }
         }
 
+        // Update other profile fields
+        user.FirstName = Input.FirstName;
+        user.LastName = Input.LastName;
+        user.DateOfBirth = Input.DateOfBirth;
+        user.Points = Input.Points;
+        user.CardNumber = Input.CardNumber;
+        user.SecurityNumber = Input.SecurityNumber;
+        user.Expiration = Input.Expiration;
+        user.CardHolderName = Input.CardHolderName;
+        user.CardType = Input.CardType;
+        user.Street = Input.Street;
+        user.City = Input.City;
+        user.State = Input.State;
+        user.Country = Input.Country;
+        user.ZipCode = Input.ZipCode;
+        user.Name = Input.Name;
+        user.IsColivingUser = Input.IsColivingUser;
+
+        var updateResult = await UserManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to update profile.", HttpContext);
+            return;
+        }
+
         await SignInManager.RefreshSignInAsync(user);
         RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
     }
@@ -74,5 +200,47 @@
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        [MaxLength(100)]
+        [Display(Name = "First name")]
+        public string? FirstName { get; set; }
+
+        [MaxLength(100)]
+        [Display(Name = "Last name")]
+        public string? LastName { get; set; }
+
+        [Display(Name = "Date of birth")]
+        public DateTime? DateOfBirth { get; set; }
+
+        public int? Points { get; set; }
+
+        [Display(Name = "Card number")]
+        public string? CardNumber { get; set; }
+
+        [Display(Name = "Security number")]
+        public string? SecurityNumber { get; set; }
+
+        [RegularExpression(@"(0[1-9]|1[0-2])\/[0-9]{2}", ErrorMessage = "Expiration should match a valid MM/YY value")]
+        [Display(Name = "Expiration (MM/YY)")]
+        public string? Expiration { get; set; }
+
+        [Display(Name = "Card holder name")]
+        public string? CardHolderName { get; set; }
+
+        [Display(Name = "Card type")]
+        public int? CardType { get; set; }
+
+        public string? Street { get; set; }
+        public string? City { get; set; }
+        public string? State { get; set; }
+        public string? Country { get; set; }
+        [Display(Name = "Zip code")]
+        public string? ZipCode { get; set; }
+
+        [Display(Name = "Display name")]
+        public string? Name { get; set; }
+
+        [Display(Name = "Is Coliving user")]
+        public bool IsColivingUser { get; set; }
     }
 }

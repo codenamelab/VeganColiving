@@ -1,10 +1,22 @@
 ﻿@implements IDisposable
 
 @inject NavigationManager NavigationManager
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Coliving.BlazorApp.Shared> L
+@inject Microsoft.Extensions.Localization.IStringLocalizerFactory LocFactory
+@inject ILogger<NavMenu> Logger
+@using System
+@using System.Globalization
+@using System.Reflection
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Coliving.BlazorApp</a>
+        <a class="navbar-brand" href="">@L["App_Title"]</a>
+        <div class="d-flex align-items-center gap-2">
+@*             <button class="btn btn-sm btn-outline-light" @onclick="SetCultureEn">@L["Lang_English"]</button>
+            <button class="btn btn-sm btn-outline-light" @onclick="SetCultureNb">@L["Lang_Norwegian"]</button> *@
+            <a class="btn btn-sm btn-outline-light" href="/set-culture/en?returnUrl=@Uri.EscapeDataString("/" + (currentUrl ?? string.Empty))">@L["Lang_English"]</a>
+            <a class="btn btn-sm btn-outline-light" href="/set-culture/nb-NO?returnUrl=@Uri.EscapeDataString("/" + (currentUrl ?? string.Empty))">@L["Lang_Norwegian"]</a>
+        </div>
     </div>
 </div>
 
@@ -14,18 +26,28 @@
     <nav class="nav flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @NavHomeText
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="flats" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Flats
+            <NavLink class="nav-link" href="homes" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @L["Nav_Flats"]
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="homes/map">
+                <span class="bi bi-geo" aria-hidden="true"></span> @L["Nav_Map"]
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="homes/register">
+                <span class="bi bi-plus-circle" aria-hidden="true"></span> @L["Nav_RegisterFlat"]
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
+                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> @L["Nav_AuthRequired"]
             </NavLink>
         </div>
 
@@ -41,7 +63,7 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> @L["Nav_Logout"]
                         </button>
                     </form>
                 </div>
@@ -49,12 +71,12 @@
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> @L["Nav_Register"]
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> @L["Nav_Login"]
                     </NavLink>
                 </div>
             </NotAuthorized>
@@ -65,10 +87,23 @@
 @code {
     private string? currentUrl;
 
+    private string NavHomeText => LogAndGet("Nav_Home");
+
+    private string LogAndGet(string key)
+    {
+        var localized = L[key];
+        Logger?.LogInformation(
+            "Localizer lookup {Key} -> '{Value}' Culture={Culture} Found={Found}",
+            key, localized.Value, CultureInfo.CurrentUICulture.Name, !localized.ResourceNotFound);
+        return localized; // implicit conversion LocalizedString -> string
+    }
+
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        DumpResourceDiagnostics();
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -80,6 +115,45 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private void SetCulture(string culture)
+    {
+        // Navigate to server endpoint that sets the culture cookie and redirects back
+        NavigationManager.NavigateTo($"set-culture/{culture}", forceLoad: true);
+    }
+
+    private void SetCultureEn() => SetCulture("en");
+    private void SetCultureNb() => SetCulture("nb-NO");
+
+    private void DumpResourceDiagnostics()
+    {
+        try
+        {
+            var asm = typeof(Shared).Assembly;
+            var assemblyName = asm.GetName().Name!;
+
+            // 1) Type-based (recommended)
+            var typeBased = LocFactory.Create(typeof(Shared));
+            var tVal = typeBased["App_Title"].Value;
+            Logger.LogInformation("Loc(Type) -> '{Value}' (Culture={Culture})", tVal, CultureInfo.CurrentUICulture);
+
+            // 2) ResourcesPath base name
+            var baseName = "Resources.Shared"; // matches Resources\Shared*.resx
+            var baseLocalizer = LocFactory.Create(baseName, assemblyName);
+            var bVal = baseLocalizer["App_Title"].Value;
+            Logger.LogInformation("Loc('{Base}','{Asm}') -> '{Value}'", baseName, assemblyName, bVal);
+
+            // 3) Fully-qualified base name
+            var fqBase = $"{assemblyName}.Resources.Shared";
+            var fqLocalizer = LocFactory.Create(fqBase, assemblyName);
+            var fVal = fqLocalizer["App_Title"].Value;
+            Logger.LogInformation("Loc('{Base}','{Asm}') -> '{Value}'", fqBase, assemblyName, fVal);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Localization diagnostics failed");
+        }
     }
 }
 

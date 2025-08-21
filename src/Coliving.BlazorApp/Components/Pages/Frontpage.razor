@@ -1,0 +1,281 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@using Coliving.BlazorApp.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using Coliving.BlazorApp.Data
+@using Coliving.BlazorApp.Models.Matrix.Core.Models
+
+@inject UserManager<ApplicationUser> UserManager
+@inject ColivingDbContext DbContext
+
+<PageTitle>Frontpage</PageTitle>
+
+<p>Culture: @System.Globalization.CultureInfo.CurrentCulture</p>
+<p>UICulture: @System.Globalization.CultureInfo.CurrentUICulture</p>
+
+<section class="hero gradient-bg rounded-4 mb-4 p-4 p-md-5 text-center text-md-start">
+    <div class="container-fluid">
+        <div class="row align-items-center g-4">
+            <div class="col-md-7">
+                <h1 class="display-5 fw-bold mb-2">Welcome to Coliving Community</h1>
+                <p class="lead mb-3">Vegan, sustainable and kind living — connect with members and discover flats aligned with your values.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="homes" class="btn btn-light btn-lg">Explore flats</a>
+                    <AuthorizeView>
+                        <Authorized>
+                            <a href="Account/Manage" class="btn btn-outline-light btn-lg">Your profile</a>
+                        </Authorized>
+                        <NotAuthorized>
+                            <a href="Account/Register" class="btn btn-outline-light btn-lg">Join now</a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+            <div class="col-md-5 d-none d-md-block text-center">
+                <div class="hero-avatars d-flex justify-content-md-end justify-content-center">
+                    @for (int i = 0; i < Math.Min(5, users?.Count ?? 0); i++)
+                    {
+                        var u = users![i];
+                        <img src="@GetProfileImageUrl(u)" alt="Member avatar" class="avatar-ring ms-n3" />
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="search-bar mt-4 p-3 bg-white rounded-3 shadow-sm">
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-6">
+                <input class="form-control form-control-lg" placeholder="Search by name, city or email" @bind-value="searchTerm" @bind-value:event="oninput" />
+            </div>
+            <div class="col-6 col-md-3">
+                <select class="form-select form-select-lg" @bind="selectedCountry">
+                    <option value="">All countries</option>
+                    @if (countries?.Count > 0)
+                    {
+                        @foreach (var c in countries)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select class="form-select form-select-lg" @bind="sortBy">
+                    <option value="points">Top points</option>
+                    <option value="name">Name (A–Z)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (users == null)
+{
+    <div class="row g-3">
+        @for (int i = 0; i < 6; i++)
+        {
+            <div class="col-sm-6 col-lg-4">
+                <div class="card member-card skeleton h-100">
+                    <div class="card-body text-center">
+                        <div class="avatar-skeleton mb-3"></div>
+                        <div class="line-skeleton w-75 mx-auto mb-2"></div>
+                        <div class="line-skeleton w-50 mx-auto mb-3"></div>
+                        <div class="line-skeleton w-50 mx-auto"></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (users.Count == 0)
+{
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="bi bi-people fs-4 me-2"></i>
+        <div>
+            <div class="fw-semibold">No members yet</div>
+            <div>Be the first to join our community.</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Community Members <span class="text-muted">(@FilteredUsers.Count())</span></h2>
+        <small class="text-muted">Showing up to 50</small>
+    </div>
+
+    @if (!FilteredUsers.Any())
+    {
+        <div class="alert alert-warning">
+            <div class="fw-semibold mb-1">No results</div>
+            <div>Try adjusting your search or filters.</div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var user in FilteredUsers)
+            {
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card member-card h-100">
+                        <div class="card-body text-center">
+                            <img 
+                                src="@GetProfileImageUrl(user)" 
+                                alt="Profile image" 
+                                class="avatar-ring mb-3" />
+                            <h5 class="card-title mb-1">
+                                @if (!string.IsNullOrEmpty(user.FirstName) && !string.IsNullOrEmpty(user.LastName))
+                                {
+                                    @($"{user.FirstName} {user.LastName}")
+                                }
+                                else if (!string.IsNullOrEmpty(user.Name))
+                                {
+                                    @user.Name
+                                }
+                                else
+                                {
+                                    @user.Email?.Split('@')[0]
+                                }
+                            </h5>
+
+                            @if (!string.IsNullOrEmpty(user.City) || !string.IsNullOrEmpty(user.Country))
+                            {
+                                <div class="text-muted small mb-2">
+                                    <i class="bi bi-geo-alt"></i>
+                                    @if (!string.IsNullOrEmpty(user.City))
+                                    {
+                                        @user.City
+                                    }
+                                    @if (!string.IsNullOrEmpty(user.City) && !string.IsNullOrEmpty(user.Country))
+                                    {
+                                        <text>, </text>
+                                    }
+                                    @if (!string.IsNullOrEmpty(user.Country))
+                                    {
+                                        @user.Country
+                                    }
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(user.Email))
+                            {
+                                <div class="mb-3">
+                                    <a class="btn btn-outline-primary btn-sm" href="mailto:@user.Email">
+                                        <i class="bi bi-envelope"></i> Contact
+                                    </a>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-center gap-3 mb-1">
+                                <span class="badge bg-success-subtle text-success-emphasis px-2 py-1">
+                                    <i class="bi bi-heart-fill me-1"></i>Kindness @user.Kindness
+                                </span>
+                                <span class="badge bg-success-subtle text-success-emphasis px-2 py-1">
+                                    <i class="bi bi-leaf-fill me-1"></i>Sustainability @user.Sustainability
+                                </span>
+                            </div>
+
+                            @if (user.Points > 0)
+                            {
+                                <div>
+                                    <span class="badge bg-primary-subtle text-primary-emphasis">
+                                        <i class="bi bi-star-fill me-1"></i>@user.Points points
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    private List<ApplicationUser>? users;
+    private IEnumerable<ApplicationUser> FilteredUsers => ApplyFilters();
+    private string searchTerm = string.Empty;
+    private string? selectedCountry = string.Empty;
+    private string sortBy = "points";
+    private List<string> countries = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get all users from the database
+            users = await DbContext.ApplicationUsers
+                // .Where(u => u.IsColivingUser) // Only show confirmed users for privacy
+                .OrderByDescending(u => u.Points)
+                .ThenBy(u => u.FirstName ?? u.Name ?? u.Email)
+                .Take(50) // Limit to first 50 users for performance
+                .ToListAsync();
+
+            // Build country filter options
+            countries = users
+                .Where(u => !string.IsNullOrWhiteSpace(u.Country))
+                .Select(u => u.Country!.Trim())
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+        }
+    catch (Exception)
+        {
+            // Handle any database errors gracefully
+            users = new List<ApplicationUser>();
+            // In a production app, you might want to log this error
+        }
+    }
+
+    private string GetProfileImageUrl(ApplicationUser user)
+    {
+        // Use a deterministic value to assign a randomuser.me image
+        // Use gender if available, otherwise default to 'men'
+        string gender = !string.IsNullOrEmpty(user.Gender) && user.Gender.ToLower() == "female" ? "women" : "men";
+        // Use a hash of the user ID or email to pick an image number between 1 and 99
+        int imageNumber = Math.Abs((user.Id != 0 ? user.Id : user.Email?.GetHashCode() ?? 1)) % 99 + 1;
+        return $"https://randomuser.me/api/portraits/{gender}/{imageNumber}.jpg";
+    }
+
+    private IEnumerable<ApplicationUser> ApplyFilters()
+    {
+        if (users == null)
+        {
+            return Enumerable.Empty<ApplicationUser>();
+        }
+
+        IEnumerable<ApplicationUser> query = users;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLowerInvariant();
+            query = query.Where(u =>
+                ($"{u.FirstName} {u.LastName}".ToLowerInvariant().Contains(term)) ||
+                (!string.IsNullOrEmpty(u.Name) && u.Name.ToLowerInvariant().Contains(term)) ||
+                (!string.IsNullOrEmpty(u.Email) && u.Email.ToLowerInvariant().Contains(term)) ||
+                (!string.IsNullOrEmpty(u.City) && u.City.ToLowerInvariant().Contains(term)) ||
+                (!string.IsNullOrEmpty(u.Country) && u.Country.ToLowerInvariant().Contains(term))
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedCountry))
+        {
+            var country = selectedCountry.Trim().ToLowerInvariant();
+            query = query.Where(u => !string.IsNullOrEmpty(u.Country) && u.Country.ToLowerInvariant() == country);
+        }
+
+        query = sortBy switch
+        {
+            "name" => query
+                .OrderBy(u => u.FirstName ?? u.Name ?? u.Email)
+                .ThenBy(u => u.LastName),
+            _ => query
+                .OrderByDescending(u => u.Points)
+                .ThenBy(u => u.FirstName ?? u.Name ?? u.Email)
+        };
+
+        return query;
+    }
+}

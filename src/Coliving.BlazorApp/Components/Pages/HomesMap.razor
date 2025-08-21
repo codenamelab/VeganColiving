@@ -1,0 +1,57 @@
+@page "/homes/map"
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@using Coliving.BlazorApp.Data
+@using Coliving.BlazorApp.Models
+@using Microsoft.JSInterop
+@using Microsoft.EntityFrameworkCore
+@inject ColivingDbContext Db
+@inject IJSRuntime JS
+
+<div id="map" style="height:70vh;border-radius:12px;box-shadow:var(--shadow-soft);"></div>
+
+@if (flats is null)
+{
+    <p>Loading flats…</p>
+}
+else if (flats.Count == 0)
+{
+    <p>No flats found.</p>
+}
+
+@code {
+    private List<Flat> flats = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        flats = await Db.Flats
+            .OrderByDescending(f => f.DateListed)
+            .ToListAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // For now still use demo listings in JS; could map real data here
+            await JS.InvokeVoidAsync("HomesMap.init", new
+            {
+                elementId = "map",
+                center = new[] { 59.9139, 10.7522 },
+                zoom = 12,
+                listings = new object[] { }
+            });
+        }
+    }
+
+    private sealed class FlatPoint
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public string? City { get; set; }
+        public string? Country { get; set; }
+        public double Price { get; set; }
+        public string? ImageUrl { get; set; }
+    }
+}

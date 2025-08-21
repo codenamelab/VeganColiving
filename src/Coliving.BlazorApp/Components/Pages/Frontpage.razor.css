@@ -1,0 +1,75 @@
+/* Scoped styles for Home page */
+
+.gradient-bg {
+    background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+    color: #fff;
+}
+
+.hero-avatars {
+    position: relative;
+}
+
+.avatar-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ffffff99;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.hero-avatars .avatar-ring {
+    margin-left: -12px;
+}
+
+.ms-n3 { margin-left: -1rem !important; }
+
+.search-bar {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.member-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.member-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+}
+
+/* Skeleton loading */
+.skeleton {
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar-skeleton {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #e9ecef;
+    margin: 0 auto;
+}
+
+.line-skeleton {
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 6px;
+}
+
+.skeleton::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150px;
+    height: 100%;
+    width: 150px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+    animation: loading 1.2s infinite;
+}
+
+@keyframes loading {
+    0% { left: -150px; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
