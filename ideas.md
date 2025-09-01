@@ -25,6 +25,8 @@ Matching: Oppretting av "lukket" gruppe am matchede personer - etter de har bekr
 Markedsundersøkelser: 
 Spørre om innspill i veganplattformer og i samtaler.
 
+Eksisterende vegankollektiver eller visninger: Reviewsfunksjonalitet.
+
 
 Preferanser og Filtre (- Ønsker vs krav) (obligatorisk vs frivillig)
 1. Beliggenhet
