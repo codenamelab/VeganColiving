@@ -70,6 +70,27 @@ else
                         <p>@flat.Description</p>
                     </div>
                 }
+
+                @if (flat.ExternalUrls is not null && flat.ExternalUrls.Any())
+                {
+                    <div class="mt-3">
+                        <h5>External Links</h5>
+                        <ul class="list-unstyled">
+                            @foreach (var link in flat.ExternalUrls.OrderByDescending(e => e.CreatedUtc))
+                            {
+                                <li class="mb-1">
+                                    <a href="@link.Url" target="_blank" rel="noopener noreferrer">
+                                        <i class="bi bi-box-arrow-up-right"></i> @link.Source
+                                    </a>
+                                    @if (!string.IsNullOrWhiteSpace(link.Notes))
+                                    {
+                                        <small class="text-muted"> - @link.Notes</small>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
             </div>
         </div>
 

@@ -25,6 +25,20 @@ namespace Coliving.BlazorApp.Models
 
 			//public int ReadingWordsPerMinute { get; set; }
 			//public int TypingCharPerMinute { get; set; }
+			// Added: notice period in days (e.g., for tenancy / cancellation)
+			public int? NoticePeriodDays { get; set; }
+
+			// Preferred minimum and maximum floor (e.g., for housing preferences)
+			public int? MinFloor { get; set; }
+			public int? MaxFloor { get; set; }
+
+			[Range(0, double.MaxValue)]
+			public decimal? MinMonthlyRentalPrice { get; set; }
+			[Range(0, double.MaxValue)]
+			public decimal? MaxMonthlyRentalPrice { get; set; }
+
+			// Indicates if the user account is active (can be deactivated instead of deleted)
+			public bool IsActive { get; set; } = true;
 
 			public string? CardNumber { get; set; }
 			public string? SecurityNumber { get; set; }

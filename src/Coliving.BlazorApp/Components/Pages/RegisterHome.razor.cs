@@ -29,6 +29,7 @@ namespace Coliving.BlazorApp.Components.Pages
         private string? imagePreviewDataUrl;
         private readonly List<(byte[] bytes, string contentType, string? title)> additionalImages = new();
         private readonly List<string> additionalImagePreviews = new();
+        private readonly List<ExternalUrl> externalUrls = new() { new ExternalUrl() };
 
         private async Task HandleValidSubmit()
         {
@@ -50,6 +51,15 @@ namespace Coliving.BlazorApp.Components.Pages
                             FileName = null
                         });
                     }
+                }
+
+                // Attach external URLs (filter out empty ones)
+                var cleaned = externalUrls
+                    .Where(u => !string.IsNullOrWhiteSpace(u.Source) && !string.IsNullOrWhiteSpace(u.Url))
+                    .ToList();
+                if (cleaned.Count > 0)
+                {
+                    newFlat.ExternalUrls = cleaned;
                 }
 
                 Db.Flats.Add(newFlat);
@@ -152,6 +162,19 @@ namespace Coliving.BlazorApp.Components.Pages
         {
             additionalImages.Clear();
             additionalImagePreviews.Clear();
+        }
+
+        private void AddExternalUrl()
+        {
+            externalUrls.Add(new ExternalUrl());
+        }
+
+        private void RemoveExternalUrl(int index)
+        {
+            if (index >= 0 && index < externalUrls.Count && externalUrls.Count > 1)
+            {
+                externalUrls.RemoveAt(index);
+            }
         }
     }
 }

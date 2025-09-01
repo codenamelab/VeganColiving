@@ -141,6 +141,44 @@ else
                     </div>
                 }
             </div>
+
+            <div class="col-12 mt-4">
+                <h5>External links</h5>
+                <p class="text-muted small mb-2">Add or update links to listings on other platforms (e.g. Airbnb, Booking) or a personal website.</p>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:15%">Source</th>
+                                <th style="width:45%">URL</th>
+                                <th style="width:30%">Notes</th>
+                                <th style="width:10%"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < externalUrls.Count; i++)
+                            {
+                                var idx = i;
+                                <tr>
+                                    <td>
+                                        <InputText class="form-control form-control-sm" @bind-Value="externalUrls[idx].Source" placeholder="Airbnb" />
+                                    </td>
+                                    <td>
+                                        <InputText class="form-control form-control-sm" @bind-Value="externalUrls[idx].Url" placeholder="https://..." />
+                                    </td>
+                                    <td>
+                                        <InputText class="form-control form-control-sm" @bind-Value="externalUrls[idx].Notes" placeholder="Optional" />
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" title="Remove" @onclick="(() => RemoveExternalUrl(idx))" disabled="@(externalUrls.Count == 1)">?</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary" @onclick="AddExternalUrl">Add link</button>
+            </div>
         </div>
 
         <div class="mt-4 d-flex gap-2 align-items-start">
@@ -175,16 +213,35 @@ else
     private readonly List<string> additionalImagePreviews = new();
     private bool showDeleteConfirm;
 
+    // External URLs editing
+    private List<ExternalUrl> externalUrls = new();
+
     protected override async Task OnParametersSetAsync()
     {
         try
         {
-            existingFlat = await Db.Flats.Include(f => f.Images).FirstOrDefaultAsync(f => f.Id == id);
+            existingFlat = await Db.Flats
+                .Include(f => f.Images)
+                .Include(f => f.ExternalUrls)
+                .FirstOrDefaultAsync(f => f.Id == id);
             if (existingFlat is null)
             {
                 error = "Home not found.";
                 return;
             }
+
+            // Clone external URLs into an editable list (avoid directly binding tracked entities for removed items)
+            externalUrls = existingFlat.ExternalUrls?.Select(u => new ExternalUrl
+            {
+                Id = u.Id,
+                FlatId = u.FlatId,
+                Source = u.Source,
+                Url = u.Url,
+                Notes = u.Notes,
+                CreatedUtc = u.CreatedUtc
+            }).ToList() ?? new List<ExternalUrl>();
+            if (externalUrls.Count == 0)
+                externalUrls.Add(new ExternalUrl { FlatId = existingFlat.Id });
 
             // Keep a reference to the current image shown
             originalImageUrl = !string.IsNullOrWhiteSpace(existingFlat.ImageUrl)
@@ -201,13 +258,13 @@ else
     {
         try
         {
-            // Ensure we generate a URL if raw image provided
+            // Primary image: ensure URL when raw bytes present
             if (existingFlat!.ImageBytes != null && !string.IsNullOrWhiteSpace(existingFlat.ImageContentType))
             {
                 existingFlat.ImageUrl = $"/api/flats/{existingFlat.Id}/image";
             }
 
-            // Attach any newly added additional images
+            // Additional images
             if (additionalImages.Count > 0)
             {
                 existingFlat.Images ??= new List<Image>();
@@ -220,6 +277,37 @@ else
                         Title = title,
                         FileName = null
                     });
+                }
+            }
+
+            // External URLs sync
+            var validUrls = externalUrls
+                .Where(u => !string.IsNullOrWhiteSpace(u.Source) && !string.IsNullOrWhiteSpace(u.Url))
+                .ToList();
+
+            existingFlat.ExternalUrls ??= new List<ExternalUrl>();
+            var tracked = existingFlat.ExternalUrls.ToList();
+
+            // Remove deleted
+            foreach (var old in tracked.Where(o => !validUrls.Any(v => v.Id == o.Id)))
+            {
+                Db.FlatExternalUrls.Remove(old);
+            }
+
+            // Add or update
+            foreach (var v in validUrls)
+            {
+                if (v.Id == 0)
+                {
+                    v.FlatId = existingFlat.Id;
+                    existingFlat.ExternalUrls.Add(v); // attach new
+                }
+                else
+                {
+                    var match = tracked.First(o => o.Id == v.Id);
+                    match.Source = v.Source;
+                    match.Url = v.Url;
+                    match.Notes = v.Notes;
                 }
             }
 
@@ -334,5 +422,18 @@ else
     {
         additionalImages.Clear();
         additionalImagePreviews.Clear();
+    }
+
+    private void AddExternalUrl()
+    {
+        externalUrls.Add(new ExternalUrl { FlatId = existingFlat?.Id ?? 0 });
+    }
+
+    private void RemoveExternalUrl(int index)
+    {
+        if (index >= 0 && index < externalUrls.Count && externalUrls.Count > 1)
+        {
+            externalUrls.RemoveAt(index);
+        }
     }
 }

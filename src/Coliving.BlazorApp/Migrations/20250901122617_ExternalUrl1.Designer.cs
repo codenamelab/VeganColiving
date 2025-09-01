@@ -4,6 +4,7 @@ using Coliving.BlazorApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coliving.BlazorApp.Migrations
 {
     [DbContext(typeof(ColivingDbContext))]
-    partial class ColivingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250901122617_ExternalUrl1")]
+    partial class ExternalUrl1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,9 +83,6 @@ namespace Coliving.BlazorApp.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("DateActivatedUtc")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("DateListed")
                         .HasColumnType("datetime2");
 
@@ -104,9 +104,6 @@ namespace Coliving.BlazorApp.Migrations
                     b.Property<decimal>("PricePerMonth")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -462,9 +459,6 @@ namespace Coliving.BlazorApp.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsColivingUser")
                         .HasColumnType("bit");
 
@@ -472,25 +466,8 @@ namespace Coliving.BlazorApp.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("MaxFloor")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("MaxMonthlyRentalPrice")
-                        .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
-
-                    b.Property<int?>("MinFloor")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("MinMonthlyRentalPrice")
-                        .HasPrecision(18)
-                        .HasColumnType("decimal(18,0)");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("NoticePeriodDays")
-                        .HasColumnType("int");
 
                     b.Property<int?>("Points")
                         .HasColumnType("int");

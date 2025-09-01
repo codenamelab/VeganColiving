@@ -8,7 +8,6 @@ namespace Coliving.BlazorApp.Models
     /// Join entity capturing a user's engagement with a Flat (Interested or Committed).
     /// Composite key: UserId + FlatId
     /// </summary>
-    [Table("VeganColiving_FlatEngagement")]
     public class FlatEngagement
     {
         [Required]

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coliving.BlazorApp.Models
 {
-	[Table("VeganColiving_Flat")]
 	public class Flat
 	{
 		[Key]
@@ -45,11 +44,20 @@ namespace Coliving.BlazorApp.Models
 		[StringLength(100)]
 		public string? ImageContentType { get; set; }
 
+		// Status to distinguish potential vs existing coliving homes
+		public HomeStatus Status { get; set; } = HomeStatus.Potential;
+
+		// When the flat became Active (nullable, only set when Status == Active)
+		public DateTime? DateActivatedUtc { get; set; }
+
 		// Navigation: Rooms in this flat/home
 		public virtual ICollection<Room>? Rooms { get; set; }
 
 		// Navigation: Multiple images for this flat
 		public virtual ICollection<Image>? Images { get; set; }
+
+		// Navigation: External URLs (zero or many)
+		public virtual ICollection<ExternalUrl>? ExternalUrls { get; set; }
 
 		// Additional fields can be added as needed, such as amenities, owner, etc.
 	}

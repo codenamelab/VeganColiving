@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coliving.BlazorApp.Models
 {
-    [Table("VeganColiving_Room")]
     public class Room
     {
         [Key]

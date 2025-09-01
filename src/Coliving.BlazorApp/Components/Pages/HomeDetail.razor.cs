@@ -27,6 +27,7 @@ namespace Coliving.BlazorApp.Components.Pages
                 flat = await Db.Flats
                     .Include(f => f.Rooms!)
                     .Include(f => f.Images)
+                    .Include(f => f.ExternalUrls) // include external links
                     .FirstOrDefaultAsync(f => f.Id == id);
 
                 if (flat is null)

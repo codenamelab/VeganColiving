@@ -38,6 +38,13 @@ namespace Coliving.BlazorApp.Data
 				.Property(r => r.PricePerMonth)
 				.HasPrecision(18, 2);
 
+			// Precision for ApplicationUser rental preferences
+			modelBuilder.Entity<ApplicationUser>(entity =>
+			{
+				entity.Property(u => u.MinMonthlyRentalPrice).HasPrecision(18, 0);
+				entity.Property(u => u.MaxMonthlyRentalPrice).HasPrecision(18, 0);
+			});
+
 			// Relationships: Flat has many Rooms
 			modelBuilder.Entity<Room>()
 				.HasOne(r => r.Flat)
@@ -64,6 +71,13 @@ namespace Coliving.BlazorApp.Data
 				.HasMany(f => f.Images)
 				.WithOne()
 				.OnDelete(DeleteBehavior.Cascade);
+
+			// Flat has many ExternalUrls
+			modelBuilder.Entity<Flat>()
+				.HasMany(f => f.ExternalUrls)
+				.WithOne(e => e.Flat!)
+				.HasForeignKey(e => e.FlatId)
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 
 	public DbSet<ApplicationUser> ApplicationUsers { get; set; } = null!;
@@ -71,6 +85,7 @@ namespace Coliving.BlazorApp.Data
 	public DbSet<FlatEngagement> FlatEngagements { get; set; } = null!;
 	public DbSet<Room> Rooms { get; set; } = null!;
 	public DbSet<Image> Images { get; set; } = null!;
+	public DbSet<ExternalUrl> FlatExternalUrls { get; set; } = null!;
 
 	}
 }
