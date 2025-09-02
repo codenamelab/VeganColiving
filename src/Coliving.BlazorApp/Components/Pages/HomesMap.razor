@@ -10,23 +10,23 @@
 
 <div id="map" style="height:70vh;border-radius:12px;box-shadow:var(--shadow-soft);"></div>
 
-@if (flats is null)
+@if (homes is null)
 {
-    <p>Loading flats…</p>
+    <p>Loading homes…</p>
 }
-else if (flats.Count == 0)
+else if (homes.Count == 0)
 {
-    <p>No flats found.</p>
+    <p>No homes found.</p>
 }
 
 @code {
-    private List<Flat>? flats; // null until loaded
+    private List<Home>? homes; // null until loaded
     private bool mapReady;
     private bool plotted;
 
     protected override async Task OnInitializedAsync()
     {
-        flats = await Db.Flats
+        homes = await Db.Homes
             .OrderByDescending(f => f.DateListed)
             .ToListAsync();
         // Trigger re-render so OnAfterRenderAsync runs again to plot
@@ -42,9 +42,9 @@ else if (flats.Count == 0)
         }
 
         // Plot when data is available and not yet plotted
-        if (mapReady && !plotted && flats is not null && flats.Count > 0)
+        if (mapReady && !plotted && homes is not null && homes.Count > 0)
         {
-            var points = flats.Select(f => new
+            var points = homes.Select(f => new
             {
                 id = f.Id,
                 title = f.Title,
@@ -54,15 +54,15 @@ else if (flats.Count == 0)
                 price = (double)f.PricePerMonth,
                 imageUrl = !string.IsNullOrWhiteSpace(f.ImageUrl)
                     ? f.ImageUrl
-                    : (f.ImageBytes != null && f.ImageBytes.Length > 0 ? $"/api/flats/{f.Id}/image" : null)
+                    : (f.ImageBytes != null && f.ImageBytes.Length > 0 ? $"/api/homes/{f.Id}/image" : null)
             }).ToList();
 
-            await JS.InvokeVoidAsync("FlatsMap.plot", points);
+            await JS.InvokeVoidAsync("FlatsMap.plot", points); // JS function name kept for now
             plotted = true;
         }
     }
 
-    private sealed class FlatPoint
+    private sealed class HomePoint
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;

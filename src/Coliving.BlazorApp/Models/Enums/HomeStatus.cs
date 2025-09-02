@@ -1,4 +1,4 @@
-namespace Coliving.BlazorApp.Models
+namespace Coliving.BlazorApp.Models.Enums
 {
 	// Lifecycle/status of a Home within the coliving app
 	public enum HomeStatus

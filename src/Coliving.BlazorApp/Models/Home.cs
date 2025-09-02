@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Coliving.BlazorApp.Models.Enums;
+
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coliving.BlazorApp.Models
 {
-	public class Flat
+	public class Home
 	{
 		[Key]
 		public int Id { get; set; }
@@ -47,13 +49,13 @@ namespace Coliving.BlazorApp.Models
 		// Status to distinguish potential vs existing coliving homes
 		public HomeStatus Status { get; set; } = HomeStatus.Potential;
 
-		// When the flat became Active (nullable, only set when Status == Active)
+		// When the home became Active (nullable, only set when Status == Active)
 		public DateTime? DateActivatedUtc { get; set; }
 
-		// Navigation: Rooms in this flat/home
+		// Navigation: Rooms in this home
 		public virtual ICollection<Room>? Rooms { get; set; }
 
-		// Navigation: Multiple images for this flat
+		// Navigation: Multiple images for this home
 		public virtual ICollection<Image>? Images { get; set; }
 
 		// Navigation: External URLs (zero or many)

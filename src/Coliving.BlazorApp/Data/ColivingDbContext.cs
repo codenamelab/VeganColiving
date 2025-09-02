@@ -30,7 +30,7 @@ namespace Coliving.BlazorApp.Data
 			base.OnModelCreating(modelBuilder);
 
 			// Precision for decimal fields
-			modelBuilder.Entity<Flat>()
+			modelBuilder.Entity<Home>()
 				.Property(f => f.PricePerMonth)
 				.HasPrecision(18, 2);
 
@@ -45,47 +45,47 @@ namespace Coliving.BlazorApp.Data
 				entity.Property(u => u.MaxMonthlyRentalPrice).HasPrecision(18, 0);
 			});
 
-			// Relationships: Flat has many Rooms
+			// Relationships: Home has many Rooms (legacy column name HomeId preserved via [Column])
 			modelBuilder.Entity<Room>()
-				.HasOne(r => r.Flat)
+				.HasOne(r => r.Home)
 				.WithMany(f => f.Rooms!)
-				.HasForeignKey(r => r.FlatId)
+				.HasForeignKey(r => r.HomeId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			// FlatEngagement composite key and relationships
-			modelBuilder.Entity<FlatEngagement>(entity =>
+			// HomeEngagement composite key and relationships (legacy column name HoomeId preserved via [Column])
+			modelBuilder.Entity<HomeEngagement>(entity =>
 			{
-				entity.HasKey(e => new { e.UserId, e.FlatId });
+				entity.HasKey(e => new { e.UserId, e.HomeId });
 				entity.HasOne(e => e.User)
 					  .WithMany()
 					  .HasForeignKey(e => e.UserId)
 					  .OnDelete(DeleteBehavior.Cascade);
-				entity.HasOne(e => e.Flat)
+				entity.HasOne(e => e.Home)
 					  .WithMany()
-					  .HasForeignKey(e => e.FlatId)
+					  .HasForeignKey(e => e.HomeId)
 					  .OnDelete(DeleteBehavior.Cascade);
 			});
 
-			// Flat has many Images
-			modelBuilder.Entity<Flat>()
-				.HasMany(f => f.Images)
+			// Home has many Images
+			modelBuilder.Entity<Home>()
+				.HasMany(h => h.Images)
 				.WithOne()
 				.OnDelete(DeleteBehavior.Cascade);
 
-			// Flat has many ExternalUrls
-			modelBuilder.Entity<Flat>()
-				.HasMany(f => f.ExternalUrls)
-				.WithOne(e => e.Flat!)
-				.HasForeignKey(e => e.FlatId)
+			// Home has many ExternalUrls (legacy column name handled via attribute on model)
+			modelBuilder.Entity<Home>()
+				.HasMany(h => h.ExternalUrls)
+				.WithOne(e => e.Home!)
+				.HasForeignKey(e => e.HomeId)
 				.OnDelete(DeleteBehavior.Cascade);
 		}
 
 	public DbSet<ApplicationUser> ApplicationUsers { get; set; } = null!;
-	public DbSet<Flat> Flats { get; set; } = null!;
-	public DbSet<FlatEngagement> FlatEngagements { get; set; } = null!;
+	public DbSet<Home> Homes { get; set; } = null!;
+	public DbSet<HomeEngagement> HomeEngagements { get; set; } = null!; // renamed from HomeEngagements
 	public DbSet<Room> Rooms { get; set; } = null!;
 	public DbSet<Image> Images { get; set; } = null!;
-	public DbSet<ExternalUrl> FlatExternalUrls { get; set; } = null!;
+	public DbSet<ExternalUrl> ExternalUrls { get; set; } = null!; // renamed from HomeExternalUrls
 
 	}
 }

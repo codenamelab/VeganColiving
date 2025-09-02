@@ -5,16 +5,17 @@ using Coliving.BlazorApp.Models.Matrix.Core.Models;
 namespace Coliving.BlazorApp.Models
 {
     /// <summary>
-    /// Join entity capturing a user's engagement with a Flat (Interested or Committed).
-    /// Composite key: UserId + FlatId
+    /// Join entity capturing a user's engagement with a Home (Interested or Committed).
+    /// Composite key: UserId + HomeId
     /// </summary>
-    public class FlatEngagement
+    public class HomeEngagement
     {
         [Required]
         public int UserId { get; set; }
 
+        // Renamed from FlatId -> HomeId. Map to existing DB column "FlatId" so old migrations still work.
         [Required]
-        public int FlatId { get; set; }
+        public int HomeId { get; set; }
 
         [Required]
         public EngagementStatus Status { get; set; }
@@ -23,7 +24,7 @@ namespace Coliving.BlazorApp.Models
 
         // Navigation
         public ApplicationUser? User { get; set; }
-        public Flat? Flat { get; set; }
+        public Home? Home { get; set; }
     }
 
     public enum EngagementStatus

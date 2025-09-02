@@ -108,9 +108,9 @@ namespace Coliving.BlazorApp.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
-        internal static string Nav_Flats {
+        internal static string Nav_Homes {
             get {
-                return ResourceManager.GetString("Nav_Flats", resourceCulture);
+                return ResourceManager.GetString("Nav_Homes", resourceCulture);
             }
         }
         
@@ -162,9 +162,9 @@ namespace Coliving.BlazorApp.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Register Flat.
         /// </summary>
-        internal static string Nav_RegisterFlat {
+        internal static string Nav_RegisterHome {
             get {
-                return ResourceManager.GetString("Nav_RegisterFlat", resourceCulture);
+                return ResourceManager.GetString("Nav_RegisterHome", resourceCulture);
             }
         }
     }

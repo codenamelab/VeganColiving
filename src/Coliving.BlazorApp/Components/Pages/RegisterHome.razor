@@ -16,60 +16,60 @@
     <div class="alert alert-danger" role="alert">@error</div>
 }
 
-<EditForm Model="@newFlat" OnValidSubmit="@HandleValidSubmit">
+<EditForm Model="@newHome" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div class="row g-3">
         <div class="col-md-6">
             <label class="form-label">Title</label>
-            <InputText class="form-control" @bind-Value="newFlat.Title" />
-            <ValidationMessage For="@(() => newFlat.Title)" />
+            <InputText class="form-control" @bind-Value="newHome.Title" />
+            <ValidationMessage For="@(() => newHome.Title)" />
         </div>
         <div class="col-md-6">
             <label class="form-label">Type</label>
-            <InputText class="form-control" @bind-Value="newFlat.Type" placeholder="Apartment, House, Room" />
-            <ValidationMessage For="@(() => newFlat.Type)" />
+            <InputText class="form-control" @bind-Value="newHome.Type" placeholder="Apartment, House, Room" />
+            <ValidationMessage For="@(() => newHome.Type)" />
         </div>
 
         <div class="col-12">
             <label class="form-label">Description</label>
-            <InputTextArea class="form-control" @bind-Value="newFlat.Description" rows="4" />
-            <ValidationMessage For="@(() => newFlat.Description)" />
+            <InputTextArea class="form-control" @bind-Value="newHome.Description" rows="4" />
+            <ValidationMessage For="@(() => newHome.Description)" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">City</label>
-            <InputText class="form-control" @bind-Value="newFlat.City" />
-            <ValidationMessage For="@(() => newFlat.City)" />
+            <InputText class="form-control" @bind-Value="newHome.City" />
+            <ValidationMessage For="@(() => newHome.City)" />
         </div>
         <div class="col-md-6">
             <label class="form-label">Country</label>
-            <InputText class="form-control" @bind-Value="newFlat.Country" />
-            <ValidationMessage For="@(() => newFlat.Country)" />
+            <InputText class="form-control" @bind-Value="newHome.Country" />
+            <ValidationMessage For="@(() => newHome.Country)" />
         </div>
 
         <div class="col-12">
             <label class="form-label">Address</label>
-            <InputText class="form-control" @bind-Value="newFlat.Address" />
-            <ValidationMessage For="@(() => newFlat.Address)" />
+            <InputText class="form-control" @bind-Value="newHome.Address" />
+            <ValidationMessage For="@(() => newHome.Address)" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">Price per month</label>
-            <InputNumber class="form-control" @bind-Value="newFlat.PricePerMonth" />
-            <ValidationMessage For="@(() => newFlat.PricePerMonth)" />
+            <InputNumber class="form-control" @bind-Value="newHome.PricePerMonth" />
+            <ValidationMessage For="@(() => newHome.PricePerMonth)" />
         </div>
         <div class="col-md-6">
             <label class="form-label">Capacity</label>
-            <InputNumber class="form-control" @bind-Value="newFlat.Capacity" />
-            <ValidationMessage For="@(() => newFlat.Capacity)" />
+            <InputNumber class="form-control" @bind-Value="newHome.Capacity" />
+            <ValidationMessage For="@(() => newHome.Capacity)" />
         </div>
 
         <div class="col-12">
             <label class="form-label">Primary image URL</label>
-            <InputText class="form-control" @bind-Value="newFlat.ImageUrl" />
-            <ValidationMessage For="@(() => newFlat.ImageUrl)" />
+            <InputText class="form-control" @bind-Value="newHome.ImageUrl" />
+            <ValidationMessage For="@(() => newHome.ImageUrl)" />
         </div>
 
         <div class="col-12">
@@ -144,6 +144,6 @@
 
     <div class="mt-4 d-flex gap-2">
         <button type="submit" class="btn btn-primary">Save</button>
-        <a href="/flats" class="btn btn-secondary">Cancel</a>
+        <a href="/homes" class="btn btn-secondary">Cancel</a>
     </div>
 </EditForm>

@@ -9,10 +9,10 @@ public class ExternalUrl
 	public int Id { get; set; }
 
 	[Required]
-	public int FlatId { get; set; }
+	public int HomeId { get; set; }
 
-	[ForeignKey(nameof(FlatId))]
-	public virtual Flat? Flat { get; set; }
+	[ForeignKey(nameof(HomeId))]
+	public virtual Home? Home { get; set; }
 
 	[Required]
 	[StringLength(50)]

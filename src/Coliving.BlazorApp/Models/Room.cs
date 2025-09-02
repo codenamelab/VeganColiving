@@ -8,11 +8,14 @@ namespace Coliving.BlazorApp.Models
         [Key]
         public int Id { get; set; }
 
+        // Renamed from FlatId -> HomeId. Map to existing DB column "FlatId" so old migrations still work.
         [Required]
-        public int FlatId { get; set; }
+        [Column("FlatId")]
+        public int HomeId { get; set; }
 
-        [ForeignKey(nameof(FlatId))]
-        public virtual Flat Flat { get; set; } = null!;
+        // Renamed navigation property Flat -> Home
+        [ForeignKey(nameof(HomeId))]
+        public virtual Home Home { get; set; } = null!;
 
         [Required]
         [StringLength(100)]

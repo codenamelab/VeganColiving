@@ -123,13 +123,13 @@
   <data name="Nav_Home" xml:space="preserve">
     <value>Forside</value>
   </data>
-  <data name="Nav_Flats" xml:space="preserve">
+  <data name="Nav_Homes" xml:space="preserve">
     <value>Boliger</value>
   </data>
   <data name="Nav_Map" xml:space="preserve">
     <value>Kart</value>
   </data>
-  <data name="Nav_RegisterFlat" xml:space="preserve">
+  <data name="Nav_RegisterHome" xml:space="preserve">
     <value>Registrer leilighet</value>
   </data>
   <data name="Nav_AuthRequired" xml:space="preserve">

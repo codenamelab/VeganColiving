@@ -16,7 +16,7 @@ namespace Coliving.BlazorApp.Components.Pages
         [Inject]
         private ColivingDbContext Db { get; set; } = default!;
 
-        private Flat? flat;
+        private Home? home;
         private string? error;
         protected string? ImageUrl { get; private set; }
 
@@ -24,21 +24,21 @@ namespace Coliving.BlazorApp.Components.Pages
         {
             try
             {
-                flat = await Db.Flats
+                home = await Db.Homes
                     .Include(f => f.Rooms!)
                     .Include(f => f.Images)
                     .Include(f => f.ExternalUrls) // include external links
                     .FirstOrDefaultAsync(f => f.Id == id);
 
-                if (flat is null)
+                if (home is null)
                 {
                     error = "Home not found.";
                     return;
                 }
 
-                ImageUrl = !string.IsNullOrWhiteSpace(flat.ImageUrl)
-                    ? flat.ImageUrl
-                    : (flat.ImageBytes != null && flat.ImageBytes.Length > 0 ? $"/api/flats/{flat.Id}/image" : null);
+                ImageUrl = !string.IsNullOrWhiteSpace(home.ImageUrl)
+                    ? home.ImageUrl
+                    : (home.ImageBytes != null && home.ImageBytes.Length > 0 ? $"/api/homes/{home.Id}/image" : null);
             }
             catch (Exception ex)
             {

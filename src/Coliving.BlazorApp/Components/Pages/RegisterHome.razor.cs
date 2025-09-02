@@ -18,7 +18,7 @@ namespace Coliving.BlazorApp.Components.Pages
         [Inject]
         private NavigationManager Nav { get; set; } = default!;
 
-        private Flat newFlat = new()
+        private Home newHome = new()
         {
             Capacity = 1,
             PricePerMonth = 0,
@@ -35,15 +35,15 @@ namespace Coliving.BlazorApp.Components.Pages
         {
             try
             {
-                newFlat.DateListed = DateTime.UtcNow;
+                newHome.DateListed = DateTime.UtcNow;
 
-                // Attach additional images to flat entity
+                // Attach additional images to home entity
                 if (additionalImages.Count > 0)
                 {
-                    newFlat.Images ??= new List<Image>();
+                    newHome.Images ??= new List<Image>();
                     foreach (var (bytes, contentType, title) in additionalImages.Take(10))
                     {
-                        newFlat.Images.Add(new Image
+                        newHome.Images.Add(new Image
                         {
                             Data = bytes,
                             ContentType = contentType,
@@ -59,16 +59,16 @@ namespace Coliving.BlazorApp.Components.Pages
                     .ToList();
                 if (cleaned.Count > 0)
                 {
-                    newFlat.ExternalUrls = cleaned;
+                    newHome.ExternalUrls = cleaned;
                 }
 
-                Db.Flats.Add(newFlat);
+                Db.Homes.Add(newHome);
                 await Db.SaveChangesAsync();
 
                 // If we stored the raw primary image, make a local URL for later display
-                if (newFlat.ImageBytes != null && !string.IsNullOrWhiteSpace(newFlat.ImageContentType))
+                if (newHome.ImageBytes != null && !string.IsNullOrWhiteSpace(newHome.ImageContentType))
                 {
-                    newFlat.ImageUrl = $"/api/flats/{newFlat.Id}/image";
+                    newHome.ImageUrl = $"/api/homes/{newHome.Id}/image";
                     await Db.SaveChangesAsync();
                 }
 
@@ -76,7 +76,7 @@ namespace Coliving.BlazorApp.Components.Pages
             }
             catch (Exception ex)
             {
-                error = $"Failed to save flat: {ex.Message}";
+                error = $"Failed to save home: {ex.Message}";
             }
         }
 
@@ -87,8 +87,8 @@ namespace Coliving.BlazorApp.Components.Pages
             var file = e.File;
             if (file is null)
             {
-                newFlat.ImageBytes = null;
-                newFlat.ImageContentType = null;
+                newHome.ImageBytes = null;
+                newHome.ImageContentType = null;
                 return;
             }
 
@@ -97,8 +97,8 @@ namespace Coliving.BlazorApp.Components.Pages
             if (file.Size > maxFileSize)
             {
                 error = "Image too large. Maximum size is 4 MB.";
-                newFlat.ImageBytes = null;
-                newFlat.ImageContentType = null;
+                newHome.ImageBytes = null;
+                newHome.ImageContentType = null;
                 return;
             }
 
@@ -107,15 +107,15 @@ namespace Coliving.BlazorApp.Components.Pages
                 using var stream = file.OpenReadStream(maxFileSize);
                 using var ms = new MemoryStream();
                 await stream.CopyToAsync(ms);
-                newFlat.ImageBytes = ms.ToArray();
-                newFlat.ImageContentType = file.ContentType;
-                imagePreviewDataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(newFlat.ImageBytes)}";
+                newHome.ImageBytes = ms.ToArray();
+                newHome.ImageContentType = file.ContentType;
+                imagePreviewDataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(newHome.ImageBytes)}";
             }
             catch (Exception ex)
             {
                 error = $"Failed to read image: {ex.Message}";
-                newFlat.ImageBytes = null;
-                newFlat.ImageContentType = null;
+                newHome.ImageBytes = null;
+                newHome.ImageContentType = null;
             }
         }
 
@@ -153,8 +153,8 @@ namespace Coliving.BlazorApp.Components.Pages
 
         private void ClearImage()
         {
-            newFlat.ImageBytes = null;
-            newFlat.ImageContentType = null;
+            newHome.ImageBytes = null;
+            newHome.ImageContentType = null;
             imagePreviewDataUrl = null;
         }
 

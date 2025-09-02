@@ -88,16 +88,16 @@ namespace Coliving.BlazorApp
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
 
-            // Minimal API to serve flat images stored in DB
-            app.MapGet("/api/flats/{id:int}/image", async (int id, ColivingDbContext db) =>
+            // Minimal API to serve home images stored in DB
+            app.MapGet("/api/homes/{id:int}/image", async (int id, ColivingDbContext db) =>
             {
-                var flat = await db.Flats.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
-                if (flat?.ImageBytes is null || flat.ImageBytes.Length == 0)
+                var home = await db.Homes.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
+                if (home?.ImageBytes is null || home.ImageBytes.Length == 0)
                 {
                     return Results.NotFound();
                 }
-                var contentType = string.IsNullOrWhiteSpace(flat.ImageContentType) ? "image/jpeg" : flat.ImageContentType;
-                return Results.File(flat.ImageBytes, contentType);
+                var contentType = string.IsNullOrWhiteSpace(home.ImageContentType) ? "image/jpeg" : home.ImageContentType;
+                return Results.File(home.ImageBytes, contentType);
             });
 
             // Minimal API to serve images from the Images table by id

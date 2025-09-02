@@ -83,7 +83,7 @@ namespace Coliving.BlazorApp.Models
 			//public ICollection<Skill>? Skills { get; set; }
 			// Convenience navigations (optional)
 			[NotMapped]
-			public virtual ICollection<Flat>? InterestedFlats { get; set; }
+			public virtual ICollection<Home>? InterestedHomes { get; set; }
 
 			// 1:1 preferences entity
 
